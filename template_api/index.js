@@ -3,6 +3,9 @@ const app = express();
 
 const { config } = require('./config/index');
 const moviesApi = require('./routes/movies');
+const morgan = require('morgan')
+const helmet = require('helmet')
+const cors = require('cors')
 
 const {
   logErrors,
@@ -13,6 +16,9 @@ const {
 const notFoundHandler = require('./utils/middleware/notFoundHandler')
 
 app.use(express.json());
+app.use(morgan('dev'))
+app.use(helmet())
+app.use(cors())
 
 moviesApi(app);
 //CATCH 404
