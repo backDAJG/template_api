@@ -3,6 +3,7 @@ const app = express();
 
 const { config } = require('./config/index');
 const moviesApi = require('./routes/movies');
+const authApi = require('./routes/auth');
 const userMoviesApi = require('./routes/userMovies');
 const morgan = require('morgan')
 const helmet = require('helmet')
@@ -22,6 +23,7 @@ app.use(morgan('dev'))
 app.use(helmet())
 app.use(cors(corsOptions));
 
+authApi(app)
 moviesApi(app);
 userMoviesApi(app)
 //CATCH 404
