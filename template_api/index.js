@@ -3,6 +3,7 @@ const app = express();
 
 const { config } = require('./config/index');
 const moviesApi = require('./routes/movies');
+const userMoviesApi = require('./routes/userMovies');
 const morgan = require('morgan')
 const helmet = require('helmet')
 const cors = require('cors')
@@ -14,13 +15,15 @@ const {
 } = require('./utils/middleware/errorHandlers');
 
 const notFoundHandler = require('./utils/middleware/notFoundHandler')
+const corsOptions = { origin: "http://example.com" };
 
 app.use(express.json());
 app.use(morgan('dev'))
 app.use(helmet())
-app.use(cors())
+app.use(cors(corsOptions));
 
 moviesApi(app);
+userMoviesApi(app)
 //CATCH 404
 app.use(notFoundHandler)
 //Errors middleware
