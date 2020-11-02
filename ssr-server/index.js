@@ -3,20 +3,35 @@ const passport = require("passport");
 const boom = require("@hapi/boom");
 const cookieParser = require("cookie-parser");
 const axios = require("axios");
+const session = require("express-session");
+const helmet = require('helmet')
 
 const { config } = require("./config/index");
 
 const app = express();
 
 app.use(express.json());
+app.use(helmet())
 app.use(cookieParser());
+app.use(
+  session({
+    secret: config.sessionSecret,
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
 //Basic strategy
 require("./utils/auth/strategies/basic");
 //OAuth Strategy
 require("./utils/auth/strategies/oauth");
-// Agregamos las variables de timpo en segundos
-const THIRTY_DAYS_IN_SEC = 2592000;
-const TWO_HOURS_IN_SEC = 7200;
+//Google Strategy
+require("./utils/auth/strategies/google");
+//Twitter Strategy
+require("./utils/auth/strategies/twitter");
+//Linkedin Strategy
+require("./utils/auth/strategies/linkedin");
+//Facebook Strategy
+require("./utils/auth/strategies/facebook");
 
 app.post("/auth/sign-in", async function (req, res, next) {
   passport.authenticate("basic", function (error, data) {
@@ -114,8 +129,104 @@ app.get(
 );
 
 app.get(
-  "auth/google-oauth/callback",
+  "/auth/google-oauth/callback",
   passport.authenticate("google-oauth", { session: false }),
+  (req, res, next) => {
+    if (!req.user) {
+      next(boom.unauthorized());
+    }
+
+    const { token, ...user } = req.user;
+
+    res.cookie("token", token, {
+      httpOnly: !config.dev,
+      secure: !config.dev,
+    });
+    res.status(200).json(user);
+  }
+);
+
+app.get(
+  "/auth/google",
+  passport.authenticate("google", {
+    scope: ["email", "profile", "openid"],
+  })
+);
+
+app.get(
+  "/auth/google/callback",
+  passport.authenticate("google", { session: false }),
+  (req, res, next) => {
+    if (!req.user) {
+      next(boom.unauthorized());
+    }
+
+    const { token, ...user } = req.user;
+
+    res.cookie("token", token, {
+      httpOnly: !config.dev,
+      secure: !config.dev,
+    });
+
+    res.status(200).json(user);
+  }
+);
+
+app.get("/auth/twitter", passport.authenticate("twitter"));
+
+app.get(
+  "/auth/twitter/callback",
+  passport.authenticate("twitter", { session: false }),
+  (req, res, next) => {
+    if (!req.user) {
+      next(boom.unauthorized);
+    }
+
+    const { token, ...user } = req.user;
+
+    res.cookie("token", token, {
+      httpOnly: !config.dev,
+      secure: !config.dev,
+    });
+
+    res.status(200).json(user);
+  }
+);
+
+app.get(
+  "/auth/linkedin",
+  passport.authenticate("linkedin", { state: "SOME STATE" })
+);
+
+app.get(
+  "/auth/linkedin/callback",
+  passport.authenticate("linkedin", { session: false }),
+  (req, res, next) => {
+    if (!req.user) {
+      next(boom.unauthorized());
+    }
+
+    const { token, ...user } = req.user;
+
+    res.cookie("token", token, {
+      httpOnly: !config.dev,
+      secure: !config.dev,
+    });
+
+    res.status(200).json(user);
+  }
+);
+
+app.get(
+  "/auth/facebook",
+  passport.authenticate("facebook", {
+    scope: ["email"],
+  })
+);
+
+app.get(
+  "/auth/facebook/callback",
+  passport.authenticate("facebook", { session: false }),
   (req, res, next) => {
     if(!req.user) {
       next(boom.unauthorized())
@@ -127,6 +238,7 @@ app.get(
       httpOnly: !config.dev,
       secure: !config.dev
     })
+
     res.status(200).json(user)
   }
 );
