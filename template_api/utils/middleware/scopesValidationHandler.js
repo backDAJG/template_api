@@ -12,6 +12,7 @@ function scopesValidationHandler(allowebScopes) {
     if (hasAccess) {
       next();
     } else {
+      console.log('scopes none')
       next(boom.unauthorized('Insufficient scopes'));
     }
   };

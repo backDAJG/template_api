@@ -16,7 +16,7 @@ const {
 } = require('./utils/middleware/errorHandlers');
 
 const notFoundHandler = require('./utils/middleware/notFoundHandler')
-const corsOptions = { origin: "http://example.com" };
+const corsOptions = { origin: "http://localhost:8000" };
 
 app.use(express.json());
 app.use(morgan('dev'))
