@@ -30,8 +30,8 @@ userMoviesApi(app)
 app.use(notFoundHandler)
 //Errors middleware
 app.use(logErrors);
-app.use(errorHandler);
 app.use(wrapErrors);
+app.use(errorHandler);
 
 app.listen(config.port, () => {
   console.log(`Listening http://localhost:${config.port}`);
